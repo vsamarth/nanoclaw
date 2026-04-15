@@ -11,6 +11,7 @@ import {
   CONTAINER_MAX_OUTPUT_SIZE,
   CONTAINER_TIMEOUT,
   DATA_DIR,
+  envConfig,
   GROUPS_DIR,
   IDLE_TIMEOUT,
   ONECLI_URL,
@@ -27,6 +28,7 @@ import {
 import { OneCLI } from '@onecli-sh/sdk';
 import { validateAdditionalMounts } from './mount-security.js';
 import { RegisteredGroup } from './types.js';
+import { readEnvFile } from './env.js';
 
 const onecli = new OneCLI({ url: ONECLI_URL });
 
@@ -249,6 +251,8 @@ async function buildContainerArgs(
 ): Promise<string[]> {
   const args: string[] = ['run', '-i', '--rm', '--name', containerName];
 
+  const env = envConfig;
+
   // Pass host timezone so container's local time matches the user's
   args.push('-e', `TZ=${TIMEZONE}`);
 
@@ -269,6 +273,20 @@ async function buildContainerArgs(
 
   // Runtime-specific args for host gateway resolution
   args.push(...hostGatewayArgs());
+
+  args.push('-e', `ANTHROPIC_BASE_URL=${envConfig.ANTHROPIC_BASE_URL}`);
+  args.push('-e', `ANTHROPIC_API_KEY=`);
+  args.push('-e', `ANTHROPIC_AUTH_TOKEN=${envConfig.ANTHROPIC_AUTH_TOKEN}`);
+  args.push('-e', `ANTHROPIC_DEFAULT_OPUS_MODEL=xiaomi/mimo-v2-flash:nitro`);
+  args.push('-e', `ANTHROPIC_DEFAULT_SONNET_MODEL=xiaomi/mimo-v2-flash:nitro`);
+  args.push('-e', `ANTHROPIC_DEFAULT_HAIKU_MODEL=xiaomi/mimo-v2-flash:nitro`);
+  args.push('-e', `CLAUDE_CODE_SUBAGENT_MODEL=xiaomi/mimo-v2-flash:nitro`);
+
+  // Parallel AI integration
+  const parallelApiKey = envConfig.PARALLEL_API_KEY;
+  if (parallelApiKey) {
+    args.push('-e', `PARALLEL_API_KEY=${parallelApiKey}`);
+  }
 
   // Run as host user so bind-mounted files are accessible.
   // Skip when running as root (uid 0), as the container's node user (uid 1000),

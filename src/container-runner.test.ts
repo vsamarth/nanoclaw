@@ -16,6 +16,11 @@ vi.mock('./config.js', () => ({
   IDLE_TIMEOUT: 1800000, // 30min
   ONECLI_URL: 'http://localhost:10254',
   TIMEZONE: 'America/Los_Angeles',
+  envConfig: {
+    ANTHROPIC_API_KEY: 'test-key',
+    ANTHROPIC_BASE_URL: 'https://api.anthropic.com',
+    ANTHROPIC_AUTH_TOKEN: 'test-token',
+  },
 }));
 
 // Mock logger
